@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { VMConfig } from "../types/VM";
+import { VMConfig, VMStatus } from "../types/VM";
 
 export default class VM {
 	private id: number;
@@ -106,7 +106,7 @@ export default class VM {
 		return d;
 	}
 
-	public async getStatus(): Promise<any> {
+	public async getStatus(): Promise<VMStatus> {
 		return this.client.get("/status/current").then((res) => {
 			const d = res.data.data;
 			d.isRunning = d.status === "running" || d.qmpstatus === "running";

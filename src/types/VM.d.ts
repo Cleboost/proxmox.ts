@@ -56,26 +56,33 @@ export interface ProxmoxSupport {
 }
 
 export interface VMStatus {
+	qmpstatus: string;
+	maxmem: number;
+	netout: number;
+	serial: number;
+	netin: number;
+	maxdisk: number;
+	name: string;
+	disk: number;
+	cpu: number;
+	mem: number;
+	diskread: number;
+	uptime: number;
+	status: string;
+	diskwrite: number;
+	agent: number;
 	isRunning: boolean;
 	hasAgent: boolean;
-	maxMemory?: Size;
-	currentMemory?: Size;
-	freeMemory?: Size;
-	balloonMemory?: Size;
-	maxDisk?: Size;
-	diskRead?: Size;
-	diskWrite?: Size;
-	networkStats?: NetworkStat[];
-	diskStats?: DiskStat[];
-	balloonInfo?: BalloonInfo;
-	isHaManaged?: boolean;
-	proxmoxSupport?: ProxmoxSupport;
-	vmId?: number;
-	cpuCount?: number;
-	uptimeSeconds?: number;
-	statusText?: string;
-	qmpStatus?: string;
-	name?: string;
+	maxMemory: Size;
+	currentMemory: Size;
+	maxDisk: Size;
+	diskRead: Size;
+	diskWrite: Size;
+	isHaManaged: boolean;
+	vmId: number;
+	cpuCount: number;
+	statusText: "running" | "stopped" | "paused" | "unknown" | "error" | string;
+	qmpStatus: "running" | "stopped" | "paused" | "unknown" | "error" | string;
 	[key: string]: any;
 }
 
