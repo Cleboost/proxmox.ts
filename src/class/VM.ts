@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from "axios";
 import { VMConfig } from "../types/VM";
 
 export default class VM {
@@ -8,8 +8,9 @@ export default class VM {
 
 	constructor(id: number, client: AxiosInstance) {
 		this.id = id;
-		this.client = client;
-		this.client.defaults.baseURL = `${this.client.defaults.baseURL}/qemu/${id}`;
+		// Clone l'instance Axios pour éviter les effets de bord
+		this.client = axios.create({ ...client.defaults });
+		this.client.defaults.baseURL = `${client.defaults.baseURL}/qemu/${id}`;
 	}
 
 	public async getConfig(forceRefresh = false): Promise<VMConfig> {
