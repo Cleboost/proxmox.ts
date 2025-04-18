@@ -7,12 +7,17 @@
     "dev": "cross-env NODE_ENV=developpement tsup",
     "build": "cross-env NODE_ENV=production tsup"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cleboost/proxmox.ts.git"
+  },
   "keywords": [
     "proxmox",
     "api",
     "wrapper"
   ],
   "author": "Cleboost",
+  "url": "git+https://github.com/Cleboost/proxmox.ts.git",
   "license": "ISC",
   "packageManager": "pnpm@10.8.1",
   "dependencies": {
