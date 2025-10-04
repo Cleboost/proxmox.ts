@@ -16,8 +16,8 @@ importers:
         specifier: ^22.14.1
         version: 22.14.1
       cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
+        specifier: ^10.0.0
+        version: 10.1.0
       tsup:
         specifier: ^8.4.0
         version: 8.4.0(typescript@5.8.3)
@@ -26,6 +26,9 @@ importers:
         version: 5.8.3
 
 packages:
+
+  '@epic-web/invariant@1.0.0':
+    resolution: {integrity: sha512-lrTPqgvfFQtR/eY/qkIzp98OGdNJu0m5ji3q/nJI8v3SXkRKEnWiOxMmbvcSoAIzv/cGiuvRy57k4suKQSAdwA==}
 
   '@esbuild/aix-ppc64@0.25.2':
     resolution: {integrity: sha512-wCIboOL2yXZym2cgm6mlA742s9QeJ8DjGVaL39dLN4rRwrOgOyYSnOaFPhKZGLb2ngj4EyfAFjsNJwPXZvseag==}
@@ -377,9 +380,9 @@ packages:
     resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
     engines: {node: ^14.18.0 || >=16.10.0}
 
-  cross-env@7.0.3:
-    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
-    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+  cross-env@10.1.0:
+    resolution: {integrity: sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==}
+    engines: {node: '>=20'}
     hasBin: true
 
   cross-spawn@7.0.6:
@@ -630,6 +633,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
@@ -723,6 +727,8 @@ packages:
     engines: {node: '>=12'}
 
 snapshots:
+
+  '@epic-web/invariant@1.0.0': {}
 
   '@esbuild/aix-ppc64@0.25.2':
     optional: true
@@ -952,8 +958,9 @@ snapshots:
 
   consola@3.4.2: {}
 
-  cross-env@7.0.3:
+  cross-env@10.1.0:
     dependencies:
+      '@epic-web/invariant': 1.0.0
       cross-spawn: 7.0.6
 
   cross-spawn@7.0.6:
