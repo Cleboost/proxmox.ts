@@ -1,7 +1,10 @@
+docs/
 src/
 playground/
-tsconfig.json
-tsup.config.ts
+.github/
+
 .gitignore
-pnpm-workspace.yaml
-docs/
+
+*.json
+*.sh
+*.yaml

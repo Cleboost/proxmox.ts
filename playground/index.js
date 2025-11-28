@@ -1,4 +1,4 @@
-import { ProxmoxNode } from "proxmox.ts";
+import { ProxmoxNode } from "../dist/index.js";
 
 const proxmox = new ProxmoxNode({ host: "https://192.168.1.100",
     port: 8006,
@@ -7,6 +7,6 @@ const proxmox = new ProxmoxNode({ host: "https://192.168.1.100",
     tokenID: "root@pam!coucou"
 });
 
-proxmox.VM(100).getStatus().then((status) => {
-  console.log("VM Status:", status);
-})
+// proxmox.VM(100).getStatus().then((status) => {
+//   console.log("VM Status:", status);
+// })

@@ -79,7 +79,7 @@ export default class VM {
 					.join(",")
 					.split(",")
 					.filter(Boolean)
-					.map((diskName, i) => ({ position: i + 1, diskName }));
+					.map((diskName: string, i: number) => ({ position: i + 1, diskName }));
 			delete d.boot;
 		}
 		if (typeof d.memory === "string" || typeof d.memory === "number") {
