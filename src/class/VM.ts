@@ -1,22 +1,22 @@
-import axios, { AxiosInstance } from "axios";
 import { VMConfig, VMStatus } from "../types/VM";
+import { FetchClient, FetchClientImpl } from "../utils/FetchClient";
+import { VMNotFoundError } from "../errors/VMNotFoundError";
 
 export default class VM {
 	private id: number;
-	private client: AxiosInstance;
+	private client: FetchClient;
 	private configCache: VMConfig | null = null;
 
-	constructor(id: number, client: AxiosInstance) {
+	constructor(id: number, client: FetchClient) {
 		this.id = id;
-		// Clone l'instance Axios pour éviter les effets de bord
-		this.client = axios.create({ ...client.defaults });
-		this.client.defaults.baseURL = `${client.defaults.baseURL}/qemu/${id}`;
+		this.client = new FetchClientImpl(`${client.baseURL}/qemu/${id}`, { ...client.headers });
 	}
 
 	public async getConfig(forceRefresh = false): Promise<VMConfig> {
 		if (this.configCache && !forceRefresh) return this.configCache;
-		const res = await this.client.get("/config");
-		const d = res.data.data;
+		try {
+			const res = await this.client.get("/config");
+			const d = res.data.data;
 		["onboot", "kvm", "numa"].forEach((k) => typeof d[k] !== "undefined" && (d[k] = d[k] === 1));
 		if (typeof d.hotplug === "string") {
 			const f = d.hotplug.split(",").map((x: string) => x.trim().toLowerCase());
@@ -104,6 +104,12 @@ export default class VM {
 		}
 		this.configCache = d;
 		return d;
+		} catch (error: any) {
+			if (error instanceof VMNotFoundError) {
+				throw error;
+			}
+			throw error;
+		}
 	}
 
 	public async getStatus(): Promise<VMStatus> {
@@ -150,6 +156,11 @@ export default class VM {
 			if (d.status) d.statusText = d.status;
 			if (d.qmpstatus) d.qmpStatus = d.qmpstatus;
 			return d;
+		}).catch((error: any) => {
+			if (error instanceof VMNotFoundError) {
+				throw error;
+			}
+			throw error;
 		});
 	}
 
@@ -157,15 +168,14 @@ export default class VM {
 		if (!["start", "stop", "reset", "suspend", "shutdown"].includes(action)) {
 			throw new Error("Invalid action. Valid actions are: start, stop, reset, suspend, shutdown.");
 		}
-		const result = await this.client
-			.post(`/status/${action}`, null)
-			.then(() => true)
-			.catch((err) => {
-				console.error("Error during power action:", err.response ? err.response.data : err.message);
-				return false;
-			});
-		await this.getConfig(true);
-		return result;
+		try {
+			await this.client.post(`/status/${action}`, null);
+			await this.getConfig(true);
+			return true;
+		} catch (err: any) {
+			console.error("Error during power action:", err.message || err);
+			return false;
+		}
 	}
 
 	public async addInterface({ model = "virtio", mac, bridge, firewall }: { model?: "virtio"; mac?: string; bridge: string; firewall?: boolean }): Promise<any> {
@@ -196,15 +206,14 @@ export default class VM {
 		const config = await this.getConfig();
 		const exists = Array.isArray(config.networks) && config.networks.some((net) => net.name === name);
 		if (!exists) throw new Error(`Interface ${name} does not exist.`);
-		const result = await this.client
-			.put("/config", { delete: name })
-			.then(() => true)
-			.catch((err) => {
-				console.error("Error during interface removal:", err.response ? err.response.data : err.message);
-				return false;
-			});
-		await this.getConfig(true);
-		return result;
+		try {
+			await this.client.put("/config", { delete: name });
+			await this.getConfig(true);
+			return true;
+		} catch (err: any) {
+			console.error("Error during interface removal:", err.message || err);
+			return false;
+		}
 	}
 }
 

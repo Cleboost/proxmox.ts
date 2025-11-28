@@ -1,8 +1,12 @@
-import { ProxmoxNode } from "../dist/index.js";
+import { ProxmoxNode } from "proxmox.ts";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-const proxmox = new ProxmoxNode({ host: "https://100.64.0.3", port: 8006, node: "athena", tokenSecret: "e44720b0-da41-4589-8fca-640ec0eaf3df", tokenID: "root@pam!test" });
+const proxmox = new ProxmoxNode({ host: "https://192.168.1.100",
+    port: 8006,
+    node: "homelab",
+    tokenSecret: "b32289d4-6ff8-4cf7-9d73-3950360e6a2a",
+    tokenID: "root@pam!coucou"
+});
 
-proxmox.VM(100).getConfig().then((config) => {
-  console.log("VM Config:", config.disks[0].size);
+proxmox.VM(100).getStatus().then((status) => {
+  console.log("VM Status:", status);
 })
