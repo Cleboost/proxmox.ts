@@ -1,6 +1,7 @@
 import { VMConfig, VMStatus } from "../types/VM";
 import { FetchClient, FetchClientImpl } from "../utils/FetchClient";
 import { VMNotFoundError } from "../errors/VMNotFoundError";
+import { VMPermissionError } from "../errors/VMPermissionError";
 
 export default class VM {
 	private id: number;
@@ -105,7 +106,7 @@ export default class VM {
 		this.configCache = d;
 		return d;
 		} catch (error: any) {
-			if (error instanceof VMNotFoundError) {
+			if (error instanceof VMNotFoundError || error instanceof VMPermissionError) {
 				throw error;
 			}
 			throw error;
@@ -157,7 +158,7 @@ export default class VM {
 			if (d.qmpstatus) d.qmpStatus = d.qmpstatus;
 			return d;
 		}).catch((error: any) => {
-			if (error instanceof VMNotFoundError) {
+			if (error instanceof VMNotFoundError || error instanceof VMPermissionError) {
 				throw error;
 			}
 			throw error;

@@ -1,4 +1,5 @@
 import { VMNotFoundError } from "../errors/VMNotFoundError";
+import { VMPermissionError } from "../errors/VMPermissionError";
 
 export interface FetchClient {
 	baseURL: string;
@@ -34,11 +35,20 @@ export class FetchClientImpl implements FetchClient {
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
-				if (response.status === 403 && this.baseURL.includes("/qemu/")) {
+				const errorMessage = errorData?.message || errorData?.data?.message || "";
+				
+				if (this.baseURL.includes("/qemu/")) {
 					const vmIdMatch = this.baseURL.match(/\/qemu\/(\d+)/);
 					if (vmIdMatch) {
 						const vmId = parseInt(vmIdMatch[1], 10);
-						throw new VMNotFoundError(vmId);
+						
+						if (response.status === 500 && errorMessage.includes("does not exist")) {
+							throw new VMNotFoundError(vmId, errorMessage);
+						}
+						
+						if (response.status === 403) {
+							throw new VMPermissionError(vmId, errorMessage);
+						}
 					}
 				}
 				
@@ -49,7 +59,7 @@ export class FetchClientImpl implements FetchClient {
 			const data = await response.json();
 			return { data };
 		} catch (error: any) {
-			if (error instanceof VMNotFoundError) {
+			if (error instanceof VMNotFoundError || error instanceof VMPermissionError) {
 				throw error;
 			}
 			
