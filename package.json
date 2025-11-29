@@ -1,6 +1,6 @@
 {
   "name": "proxmox.ts",
-  "version": "0.2.1-rc.3432c06",
+  "version": "0.2.1-rc.3432c06-rc.0d9b8f9",
   "description": "An API wrapper for Proxmox",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
