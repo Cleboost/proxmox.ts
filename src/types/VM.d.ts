@@ -125,5 +125,7 @@ export interface VMConfig {
 	hotplug?: HotplugConfig;
 	networks?: NetConfig[];
 	disks?: DiskConfig[];
+	cpu?: string;
+	ostype?: string;
 	[key: string]: any;
 }

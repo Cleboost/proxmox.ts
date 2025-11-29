@@ -1,4 +1,4 @@
-import { VMConfig, VMStatus } from "../types/VM";
+import { VMConfig, VMStatus, Size } from "../types/VM";
 import { FetchClient, FetchClientImpl } from "../utils/FetchClient";
 import { VMNotFoundError } from "../errors/VMNotFoundError";
 import { VMPermissionError } from "../errors/VMPermissionError";
@@ -214,6 +214,67 @@ export default class VM {
 		} catch (err: any) {
 			console.error("Error during interface removal:", err.message || err);
 			return false;
+		}
+	}
+
+	public async setConfig(config: Partial<VMConfig & { ram?: number | Size }>): Promise<VMConfig> {
+		const updateData: Record<string, any> = {};
+		if (config.name !== undefined) updateData.name = config.name;
+		if (config.cores !== undefined) updateData.cores = config.cores;
+		if (config.sockets !== undefined) updateData.sockets = config.sockets;
+		const memoryValue = config.memory !== undefined ? config.memory : (config as any).ram;
+		if (memoryValue !== undefined) {
+			if (typeof memoryValue === "object" && "raw" in memoryValue) {
+				updateData.memory = typeof memoryValue.raw === "number" ? memoryValue.raw : memoryValue.raw;
+			} else if (typeof memoryValue === "number") {
+				updateData.memory = memoryValue;
+			} else {
+				updateData.memory = memoryValue;
+			}
+		}
+		if (config.onboot !== undefined) updateData.onboot = config.onboot ? 1 : 0;
+		if (config.kvm !== undefined) updateData.kvm = config.kvm ? 1 : 0;
+		if (config.numa !== undefined) updateData.numa = config.numa ? 1 : 0;
+		if (config.serial0 !== undefined) updateData.serial0 = config.serial0;
+		if (config.scsihw !== undefined) updateData.scsihw = config.scsihw;
+		if (config.ostype !== undefined) updateData.ostype = config.ostype;
+		if (config.cpu !== undefined) updateData.cpu = config.cpu;
+		if (config.agent !== undefined) updateData.agent = config.agent;
+		if (config.user !== undefined) updateData.ciuser = config.user;
+		if (config.password !== undefined) updateData.cipassword = config.password;
+		if (config.smbios1 !== undefined) updateData.smbios1 = config.smbios1;
+		if (config.vmgenid !== undefined) updateData.vmgenid = config.vmgenid;
+		if (config.bootOrder !== undefined && Array.isArray(config.bootOrder)) {
+			const bootOrder = config.bootOrder.map((item) => item.diskName).join(";");
+			updateData.boot = `order=${bootOrder}`;
+		}
+		if (config.meta !== undefined && typeof config.meta === "object") {
+			const metaEntries = Object.entries(config.meta).map(([k, v]) => `${k.trim()}=${String(v).trim()}`);
+			updateData.meta = metaEntries.join(",");
+		}
+		if (config.hotplug !== undefined && typeof config.hotplug === "object") {
+			const hotplugParts: string[] = [];
+			if (config.hotplug.cpu) hotplugParts.push("cpu");
+			if (config.hotplug.disk) hotplugParts.push("disk");
+			if (config.hotplug.network) hotplugParts.push("network");
+			if (config.hotplug.usb) hotplugParts.push("usb");
+			if (config.hotplug.memory) hotplugParts.push("memory");
+			if (hotplugParts.length > 0) {
+				updateData.hotplug = hotplugParts.join(",");
+			}
+		}
+		if (Object.keys(updateData).length === 0) {
+			throw new Error("No configuration options specified");
+		}
+		try {
+			await this.client.put("/config", updateData);
+			await this.getConfig(true);
+			return this.configCache!;
+		} catch (error: any) {
+			if (error instanceof VMNotFoundError || error instanceof VMPermissionError) {
+				throw error;
+			}
+			throw error;
 		}
 	}
 }
