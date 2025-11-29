@@ -34,8 +34,17 @@ export class FetchClientImpl implements FetchClient {
 			});
 
 			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				const errorMessage = errorData?.message || errorData?.data?.message || "";
+				let errorData: any = {};
+				let errorText = "";
+				
+				try {
+					errorText = await response.text();
+					errorData = JSON.parse(errorText);
+				} catch (parseError) {
+					errorData = { raw: errorText };
+				}
+				
+				const errorMessage = errorData?.message || errorData?.data?.message || errorData?.raw || "";
 				
 				if (this.baseURL.includes("/qemu/")) {
 					const vmIdMatch = this.baseURL.match(/\/qemu\/(\d+)/);
@@ -49,11 +58,16 @@ export class FetchClientImpl implements FetchClient {
 						if (response.status === 403) {
 							throw new VMPermissionError(vmId, errorMessage);
 						}
+						
+						if (response.status === 500) {
+							const detailedMessage = errorMessage || JSON.stringify(errorData);
+							throw new Error(`VM ${vmId} operation failed: ${detailedMessage}`);
+						}
 					}
 				}
 				
-				console.error("Error response:", errorData);
-				throw new Error(`HTTP error! status: ${response.status}`);
+				const detailedError = errorMessage ? `${errorMessage}` : JSON.stringify(errorData);
+				throw new Error(`HTTP error! status: ${response.status}. ${detailedError}`);
 			}
 
 			const data = await response.json();
@@ -61,12 +75,6 @@ export class FetchClientImpl implements FetchClient {
 		} catch (error: any) {
 			if (error instanceof VMNotFoundError || error instanceof VMPermissionError) {
 				throw error;
-			}
-			
-			if (error.message) {
-				console.error("Error message:", error.message);
-			} else {
-				console.error("Error request:", error);
 			}
 			throw error;
 		}
@@ -79,7 +87,7 @@ export class FetchClientImpl implements FetchClient {
 	async post<T = any>(url: string, body?: any): Promise<{ data: T }> {
 		return this.request<T>(url, {
 			method: "POST",
-			body: body ? JSON.stringify(body) : undefined,
+			body: body !== undefined && body !== null ? JSON.stringify(body) : undefined,
 		});
 	}
 

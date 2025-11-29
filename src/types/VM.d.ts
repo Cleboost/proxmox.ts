@@ -129,3 +129,11 @@ export interface VMConfig {
 	ostype?: string;
 	[key: string]: any;
 }
+
+export enum VMPowerAction {
+	START = "start",
+	STOP = "stop",
+	RESET = "reset",
+	SUSPEND = "suspend",
+	SHUTDOWN = "shutdown",
+}

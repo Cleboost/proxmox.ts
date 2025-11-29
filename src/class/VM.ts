@@ -1,4 +1,4 @@
-import { VMConfig, VMStatus, Size } from "../types/VM";
+import { VMConfig, VMStatus, Size, VMPowerAction } from "../types/VM";
 import { FetchClient, FetchClientImpl } from "../utils/FetchClient";
 import { VMNotFoundError } from "../errors/VMNotFoundError";
 import { VMPermissionError } from "../errors/VMPermissionError";
@@ -165,17 +165,22 @@ export default class VM {
 		});
 	}
 
-	public async powerAction(action: "start" | "stop" | "reset" | "suspend" | "shutdown"): Promise<any> {
-		if (!["start", "stop", "reset", "suspend", "shutdown"].includes(action)) {
+	public async powerAction(action: VMPowerAction | "start" | "stop" | "reset" | "suspend" | "shutdown"): Promise<any> {
+		const actionValue = typeof action === "string" ? action : (action as VMPowerAction);
+		
+		if (!["start", "stop", "reset", "suspend", "shutdown"].includes(actionValue)) {
 			throw new Error("Invalid action. Valid actions are: start, stop, reset, suspend, shutdown.");
 		}
+		
 		try {
-			await this.client.post(`/status/${action}`, null);
+			await this.client.post(`/status/${actionValue}`, {});
 			await this.getConfig(true);
 			return true;
 		} catch (err: any) {
-			console.error("Error during power action:", err.message || err);
-			return false;
+			if (err instanceof VMNotFoundError || err instanceof VMPermissionError) {
+				throw err;
+			}
+			throw new Error(`Failed to execute power action '${actionValue}': ${err.message || "Unknown error"}`);
 		}
 	}
 
@@ -212,7 +217,9 @@ export default class VM {
 			await this.getConfig(true);
 			return true;
 		} catch (err: any) {
-			console.error("Error during interface removal:", err.message || err);
+			if (err instanceof VMNotFoundError || err instanceof VMPermissionError) {
+				throw err;
+			}
 			return false;
 		}
 	}
@@ -229,13 +236,27 @@ export default class VM {
 					updateData.memory = memoryValue.raw;
 				} else if (typeof memoryValue.mo === "number") {
 					updateData.memory = memoryValue.mo;
+				} else if (typeof memoryValue.raw === "string") {
+					const parsed = parseFloat(memoryValue.raw);
+					if (!isNaN(parsed)) {
+						updateData.memory = parsed;
+					} else {
+						throw new Error(`Invalid memory value: ${memoryValue.raw}. Expected a number or a Size object with numeric values.`);
+					}
 				} else {
-					updateData.memory = memoryValue.raw;
+					throw new Error(`Invalid memory value: expected a number or a Size object with numeric raw or mo property.`);
 				}
 			} else if (typeof memoryValue === "number") {
 				updateData.memory = memoryValue;
+			} else if (typeof memoryValue === "string") {
+				const parsed = parseFloat(memoryValue);
+				if (!isNaN(parsed)) {
+					updateData.memory = parsed;
+				} else {
+					throw new Error(`Invalid memory value: ${memoryValue}. Expected a number in MB.`);
+				}
 			} else {
-				updateData.memory = memoryValue;
+				throw new Error(`Invalid memory value type: expected number, string, or Size object, got ${typeof memoryValue}.`);
 			}
 		}
 		if (config.onboot !== undefined) updateData.onboot = config.onboot ? 1 : 0;
