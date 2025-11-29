@@ -8,6 +8,9 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Proxmox-ef472e?logo=proxmox&logoColor=white&style=for-the-badge" alt="Proxmox" />
+  <a href="https://www.npmjs.com/package/proxmox.ts">
+    <img src="https://img.shields.io/npm/v/proxmox.ts?color=cb3837&label=npm&logo=npm&logoColor=white&style=for-the-badge" alt="npm version" />
+  </a>
   <a href="https://www.typescriptlang.org/">
     <img src="https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white&style=for-the-badge" alt="TypeScript" />
   </a>
@@ -26,3 +29,10 @@ npm install proxmox.ts
 npm i proxmox.ts@0.2.1-rc.3432c06 #for rolling release (unstable) (change the version to the latest one)
 bun install proxmox.ts
 ```
+
+
+## Discord Support Channel
+
+If you need help, have questions or just want to chat, join my Discord server:
+
+[![Discord](https://img.shields.io/discord/1444262173009248359?color=7289da&label=Discord&logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/CDmMzfhTJZ)
