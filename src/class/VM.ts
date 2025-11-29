@@ -225,7 +225,13 @@ export default class VM {
 		const memoryValue = config.memory !== undefined ? config.memory : (config as any).ram;
 		if (memoryValue !== undefined) {
 			if (typeof memoryValue === "object" && "raw" in memoryValue) {
-				updateData.memory = typeof memoryValue.raw === "number" ? memoryValue.raw : memoryValue.raw;
+				if (typeof memoryValue.raw === "number") {
+					updateData.memory = memoryValue.raw;
+				} else if (typeof memoryValue.mo === "number") {
+					updateData.memory = memoryValue.mo;
+				} else {
+					updateData.memory = memoryValue.raw;
+				}
 			} else if (typeof memoryValue === "number") {
 				updateData.memory = memoryValue;
 			} else {
