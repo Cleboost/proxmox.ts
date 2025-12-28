@@ -7,6 +7,7 @@ export interface FetchClient {
 	get<T = any>(url: string): Promise<{ data: T }>;
 	post<T = any>(url: string, body?: any): Promise<{ data: T }>;
 	put<T = any>(url: string, body?: any): Promise<{ data: T }>;
+	delete<T = any>(url: string): Promise<{ data: T }>;
 }
 
 export class FetchClientImpl implements FetchClient {
@@ -45,9 +46,11 @@ export class FetchClientImpl implements FetchClient {
 				}
 				
 				const errorMessage = errorData?.message || errorData?.data?.message || errorData?.raw || "";
+				const fullErrorDetails = JSON.stringify(errorData, null, 2);
 				
-				if (this.baseURL.includes("/qemu/")) {
-					const vmIdMatch = this.baseURL.match(/\/qemu\/(\d+)/);
+				const urlToCheck = fullUrl.includes("/qemu/") ? fullUrl : this.baseURL;
+				if (urlToCheck.includes("/qemu/")) {
+					const vmIdMatch = urlToCheck.match(/\/qemu\/(\d+)/);
 					if (vmIdMatch) {
 						const vmId = parseInt(vmIdMatch[1], 10);
 						
@@ -60,13 +63,22 @@ export class FetchClientImpl implements FetchClient {
 						}
 						
 						if (response.status === 500) {
-							const detailedMessage = errorMessage || JSON.stringify(errorData);
+							const detailedMessage = errorMessage || fullErrorDetails;
 							throw new Error(`VM ${vmId} operation failed: ${detailedMessage}`);
+						}
+						
+						if (response.status === 400) {
+							const errors = errorData?.errors || {};
+							const errorDetails = Object.entries(errors).map(([key, value]) => `${key}: ${value}`).join(", ");
+							const detailedMessage = errorDetails 
+								? `${errorMessage}${errorDetails ? ` - ${errorDetails}` : ""}`
+								: (errorMessage || fullErrorDetails);
+							throw new Error(`VM ${vmId} operation failed (400 Bad Request): ${detailedMessage}`);
 						}
 					}
 				}
 				
-				const detailedError = errorMessage ? `${errorMessage}` : JSON.stringify(errorData);
+				const detailedError = errorMessage ? `${errorMessage}\n\nFull error details: ${fullErrorDetails}` : fullErrorDetails;
 				throw new Error(`HTTP error! status: ${response.status}. ${detailedError}`);
 			}
 
@@ -96,6 +108,10 @@ export class FetchClientImpl implements FetchClient {
 			method: "PUT",
 			body: body ? JSON.stringify(body) : undefined,
 		});
+	}
+
+	async delete<T = any>(url: string): Promise<{ data: T }> {
+		return this.request<T>(url, { method: "DELETE" });
 	}
 }
 

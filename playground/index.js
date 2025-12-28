@@ -7,12 +7,15 @@ const proxmox = new ProxmoxNode({ host: "https://192.168.1.100",
     tokenID: "root@pam!coucou"
 });
 
-proxmox.VM(100).powerAction(VMPowerAction.START).then((status) => {
+proxmox.VM(100).powerAction(VMPowerAction.STOP).then((status) => {
   console.log("VM Status:", status);
+})
+
+proxmox.remove(102).then((status) => {
+  console.log("VM Removed:", status);
 })
 
 // proxmox.VM(100).powerAction(ProxmoxVMStatus.START).then((status) => {
 //     console.log("VM Status:", status);
 //   })
-  
   
