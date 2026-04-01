@@ -83,6 +83,7 @@ export interface VMStatus {
 	cpuCount: number;
 	statusText: "running" | "stopped" | "paused" | "unknown" | "error" | string;
 	qmpStatus: "running" | "stopped" | "paused" | "unknown" | "error" | string;
+	lock?: string; //If undefined = not lock
 	[key: string]: any;
 }
 

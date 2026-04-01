@@ -1,4 +1,4 @@
-import { ProxmoxNodeOptions, ProxmoxVersion, VMCount } from "../types/ProxmoxNode";
+import { ProxmoxNodeOptions, ProxmoxRaw, ProxmoxVersion, VMCount } from "../types/ProxmoxNode";
 import VM from "./VM";
 import { FetchClient, FetchClientImpl } from "../utils/FetchClient";
 import { VMNotFoundError } from "../errors/VMNotFoundError";
@@ -27,6 +27,20 @@ export default class ProxmoxNode {
 
 	public VM(id: number) {
 		return new VM(id, this.client);
+	}
+
+	/**
+	 * Access to the raw Proxmox API for endpoints that are not yet implemented.
+	 * All requests are automatically prefixed with the node's URL and include authentication headers.
+	 * For example: proxmox.raw.$get("/journal")
+	 */
+	public get raw(): ProxmoxRaw {
+		return {
+			$get: <T = any>(url: string) => this.client.get(url).then((res) => res.data.data as T),
+			$post: <T = any>(url: string, body?: any) => this.client.post(url, body).then((res) => res.data.data as T),
+			$put: <T = any>(url: string, body?: any) => this.client.put(url, body).then((res) => res.data.data as T),
+			$delete: <T = any>(url: string) => this.client.delete(url).then((res) => res.data.data as T),
+		};
 	}
 
 	public async version(): Promise<ProxmoxVersion> {
