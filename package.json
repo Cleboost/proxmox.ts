@@ -1,13 +1,14 @@
 {
   "name": "proxmox.ts",
-  "version": "0.2.1-rc.3432c06-rc.0d9b8f9",
+  "version": "0.3.0",
   "description": "An API wrapper for Proxmox",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "bun build src/index.ts --outdir dist --watch --dts",
     "build": "bun build src/index.ts --outdir dist --production --target node && bunx dts-bundle-generator -o dist/index.d.ts src/index.ts",
-    "types": "bunx dts-bundle-generator -o dist/index.d.ts src/index.ts"
+    "types": "bunx dts-bundle-generator -o dist/index.d.ts src/index.ts",
+    "prepack": "bun run build"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,8 @@
     "@types/bun": "^1.3.3",
     "dts-bundle-generator": "^9.5.1",
     "typescript": "^5.8.3"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
